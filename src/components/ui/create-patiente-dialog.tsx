@@ -13,6 +13,15 @@ import { Label } from "./label";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useState } from "react";
+
+interface Data {
+  id: number;
+  name: string;
+  document: string;
+  sexo: string;
+  dataDeNascimento: string; 
+}
 
 const createPatienteSchema = z.object({
   name: z.string(),
@@ -25,15 +34,51 @@ const createPatienteSchema = z.object({
 
 type CreatePatienteSchema = z.infer<typeof createPatienteSchema>;
 
-export function CreatePatienteDialog() {
+export function CreatePatienteDialog( { onAddPaciente } : { onAddPaciente: (newPaciente : Data) => void}) {
+
   const { register, handleSubmit, formState: { errors } } = useForm<CreatePatienteSchema>({
     resolver: zodResolver(createPatienteSchema),
   });
 
-  function handleCreatePatiente(data: CreatePatienteSchema) {
+  const [loading, setLoading] = useState(false)
+
+  async function handleCreatePatiente(data: CreatePatienteSchema) {
     event?.preventDefault();
     console.log(data);
+    setLoading(true);
+    try{
+      const newPaciente = await addPaciente(data);
+      onAddPaciente(newPaciente);
+    } catch (error) {
+      console.error('Erro ao adicionar paciente', error);
+    } finally {
+      setLoading(false);
+    }
   }
+
+  async function addPaciente(newPaciente: Omit<Data, 'id'>): Promise<Data>{
+    try {
+      const response = await fetch('http://localhost:3000/pacientes', {
+        method: 'POST',
+        headers: {
+          'Content-Type' : 'application/json',
+        },
+        body: JSON.stringify(newPaciente)
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao adicionar paciente');
+      }
+
+      const data: Data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Erro: ', error);
+      throw error;
+    }
+  }
+
+
 
   return (
     <DialogContent>
@@ -83,7 +128,9 @@ export function CreatePatienteDialog() {
               Cancelar
             </Button>
           </DialogClose>
-          <Button type="submit">Salvar</Button>
+          <Button type="submit" disabled={loading}>
+              {loading ? "Salvando..." : "Salvar"}
+          </Button>
         </DialogFooter>
       </form>
     </DialogContent>
