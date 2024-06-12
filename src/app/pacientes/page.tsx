@@ -74,7 +74,6 @@ export default function Pacientes(){
     }
 
     return(
-        <>
             <div className="flex flex-col m-10 p-3">
                 <div className="flex flex-col mb-8 gap-4">
                     <h2 className="text-4xl">Lista de Pacientes</h2>
@@ -131,7 +130,6 @@ export default function Pacientes(){
                     </TableBody>
                 </Table>
             </div>
-        </>
 
 
     )
