@@ -82,7 +82,7 @@ export function EditPatienteDialog({
             const updatedPatient = await updatePaciente(patientId, data);
             onPatientUpdated(updatedPatient);
         } catch (error) {
-            console.error("Erro ao atualizar pciente :", error)
+            console.error("Erro ao atualizar paciente :", error)
         }
     }
 

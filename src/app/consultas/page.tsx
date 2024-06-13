@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { CreateConsultaDialog } from "@/components/ui/create-consulta-dialog";
 import { CreatePatienteDialog } from "@/components/ui/create-patiente-dialog";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { EditConsultaDialog } from "@/components/ui/edit-consulta-dialog";
 import { EditPatienteDialog } from "@/components/ui/edit-patiente-dialog";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BadgeX, FilePenLine } from "lucide-react";
@@ -112,7 +113,13 @@ export default function Consultas(){
                                             <TableCell><FilePenLine onClick={() => setSelectedConsulta(consulta)} className="cursor-pointer"/></TableCell>
                                         </DialogTrigger>
                                         
-                                       
+                                       {selectedConsulta && (
+                                            <EditConsultaDialog 
+                                                consultaId={selectedConsulta.id}
+                                                initialData={selectedConsulta}
+                                                onConsultaUpdated={handleUpdateConsulta}
+                                            />
+                                       )}
                                     </Dialog>
                                     <TableCell><BadgeX onClick={() => handleDeleteConsulta(consulta.id)} className="cursor-pointer"/></TableCell>
                                 </TableRow>
