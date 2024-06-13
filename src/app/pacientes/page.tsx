@@ -117,10 +117,10 @@ export default function Pacientes(){
                                         
                                         {selectedPaciente && (
                                             <EditPatienteDialog 
-                                            patientId={selectedPaciente.id}
-                                            initialData={selectedPaciente}
-                                            onPatientUpdated={handleUpdatePaciente}
-                                        />
+                                                patientId={selectedPaciente.id}
+                                                initialData={selectedPaciente}
+                                                onPatientUpdated={handleUpdatePaciente}
+                                            />
                                         )}
                                     </Dialog>
                                     <TableCell><BadgeX onClick={() => handleDeletePaciente(paciente.id)} className="cursor-pointer"/></TableCell>
