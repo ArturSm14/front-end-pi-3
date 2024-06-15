@@ -1,3 +1,4 @@
+"use Client"
 import { Button } from "./button";
 import { DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./dialog";
 import { Input } from "./input";
@@ -5,21 +6,21 @@ import { Label } from "./label";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface Data{
     id: number;
     queixaPrincipal: string;
     medico: string;
     diagnostico: string;
-    paciente: string;
+    paciente: number;
 }
 
 const createConsultaSchema = z.object({
     queixaPrincipal: z.string(),
     medico: z.string(),
     diagnostico : z.string(),
-    paciente: z.string()
+    paciente: z.coerce.number().min(1, "Selecione um paciente"),
 })
 
 type CreateConsultasSchema = z.infer<typeof createConsultaSchema>;
@@ -31,13 +32,36 @@ export function CreateConsultaDialog( { onAddConsulta} : { onAddConsulta: (newCo
     });
 
     const [ loading, setLoading] = useState(false)
+    const [pacientes, setPacientes] = useState<{ id: number, name: string}[]>([])
+
+    useEffect(() => {
+      async function fetchPacientes() {
+        try {
+          const response = await fetch(`http://localhost:8080/pacientes/nomes`);
+
+          if(!response.ok) {
+            throw new Error('Erro ao buscar pacientes');
+          }
+
+          const data = await response.json();
+          setPacientes(data);
+        } catch (error) {
+          console.error('Erro ao buscar pacientes: ', error);
+        }
+      }
+
+      fetchPacientes();
+    }, []);
 
     async function handleCreateConsulta(data: CreateConsultasSchema) {
         event?.preventDefault();
         console.log(data);
         setLoading(true);
         try{
-            const newConsulta= await addConsulta(data);
+            const newConsulta= await addConsulta({
+              ...data,
+              paciente: Number(data.paciente)
+            });
             onAddConsulta(newConsulta);
         } catch (error) {
             console.error('Erro ao adicionar consulta', error)
@@ -48,7 +72,7 @@ export function CreateConsultaDialog( { onAddConsulta} : { onAddConsulta: (newCo
 
     async function addConsulta(newConsulta: Omit<Data, 'id'>): Promise<Data>{
         try {
-            const response = await fetch('http://localhost:3000/consultas', {
+            const response = await fetch(`http://localhost:8080/consultas/${newConsulta.paciente}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type' : 'application/json',
@@ -104,11 +128,13 @@ export function CreateConsultaDialog( { onAddConsulta} : { onAddConsulta: (newCo
 
         <div className=" grid grid-cols-6 items-center text-right gap-3">
           <Label htmlFor="paciente">Paciente</Label>
-          <Input
-            className="col-span-3"
-            id="paciente"
-            {...register("paciente")}
-          />
+          <select className="col-span-3" id="paciente" {...register("paciente")}>
+              {pacientes.map(paciente => (
+                <option key={paciente.id} value={paciente.id}>
+                  {paciente.name}
+                </option>
+              ))}
+          </select>
           {errors.paciente && <p>{errors.paciente.message}</p>}
         </div>
 

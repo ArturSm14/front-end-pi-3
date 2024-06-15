@@ -28,7 +28,7 @@ export default function Pacientes(){
     useEffect(() => {
         async function fetchData() {
             try {
-                const response = await fetch('http://localhost:3000/pacientes')
+                const response = await fetch('http://localhost:8080/pacientes')
                 if(!response.ok){
                     throw new Error('Erro ao buscar dados');
                 }
@@ -58,7 +58,7 @@ export default function Pacientes(){
 
     async function handleDeletePaciente(id: number) {
         try {
-            const response = await fetch(`http://localhost:3000/pacientes/${id}`, {
+            const response = await fetch(`http://localhost:8080/pacientes/${id}`, {
                 method: 'DELETE',
             });
         

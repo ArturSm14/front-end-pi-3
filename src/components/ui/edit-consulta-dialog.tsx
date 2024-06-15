@@ -1,3 +1,4 @@
+"use client"
 import { Button } from "./button";
 import { DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./dialog";
 import { Input } from "./input";
@@ -5,21 +6,22 @@ import { Label } from "./label";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface Data{
     id: number;
     queixaPrincipal: string;
     medico: string;
     diagnostico: string;
-    paciente: string;
+    paciente: number;
 }
 
 const editConsultaSchema = z.object({
+    id: z.number(),
     queixaPrincipal: z.string(),
     medico: z.string(),
     diagnostico : z.string(),
-    paciente: z.string()
+    paciente: z.coerce.number().min(1, "Selecione um paciente"),
 })
 
 type EditConsultaSchema = z.infer<typeof editConsultaSchema>;
@@ -39,6 +41,27 @@ export function EditConsultaDialog({
         defaultValues: initialData,
     });
 
+    const [pacientes, setPacientes] = useState<{ id: number, name: string}[]>([])
+
+    useEffect(() => {
+      async function fetchPacientes() {
+        try {
+          const response = await fetch(`http://localhost:8080/pacientes/nomes`);
+
+          if(!response.ok) {
+            throw new Error('Erro ao buscar pacientes');
+          }
+
+          const data = await response.json();
+          setPacientes(data);
+        } catch (error) {
+          console.error('Erro ao buscar pacientes: ', error);
+        }
+      }
+
+      fetchPacientes();
+    }, []);
+
     useEffect(() => {
         if (initialData) {
             setValue("queixaPrincipal", initialData.queixaPrincipal);
@@ -53,10 +76,10 @@ export function EditConsultaDialog({
         updatedConsulta: Omit<Data, "id">
     ): Promise<Data> {
         try {
-            const response = await fetch(`http://localhost:3000/consultas/${id}`, {
+            const response = await fetch(`http://localhost:8080/consultas/${id}`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'applicantion/json',
+                    'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(updatedConsulta),
             });
@@ -76,7 +99,7 @@ export function EditConsultaDialog({
     async function handleFormSubmit(data: EditConsultaSchema) {
         event?.preventDefault();
         try {
-            const updatedConsulta = await updateConsulta(consultaId, data);
+            const updatedConsulta = await updateConsulta(consultaId, {...data, paciente: Number(data.paciente)});
             onConsultaUpdated(updatedConsulta);
         } catch (error) {
             console.error("Erro ao atualizar consulta :", error)
@@ -119,11 +142,13 @@ export function EditConsultaDialog({
 
         <div className=" grid grid-cols-6 items-center text-right gap-3">
           <Label htmlFor="paciente">Paciente</Label>
-          <Input
-            className="col-span-3"
-            id="paciente"
-            {...register("paciente")}
-          />
+          <select className="col-span-3" id="paciente" {...register("paciente")}>
+              {pacientes.map(paciente => (
+                <option key={paciente.id} value={paciente.id}>
+                  {paciente.name}
+                </option>
+              ))}
+          </select>
           {errors.paciente && <p>{errors.paciente.message}</p>}
         </div>
 

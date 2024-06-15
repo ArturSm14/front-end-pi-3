@@ -17,6 +17,7 @@ interface Data {
 }
 
 const editPatienteSchema = z.object({
+    id: z.number(),
     name: z.string(),
     document: z.string(),
     sexo: z.string(),
@@ -44,6 +45,7 @@ export function EditPatienteDialog({
 
     useEffect(() => {
         if (initialData) {
+            setValue("id", initialData.id)
             setValue("name", initialData.name);
             setValue("document", initialData.document);
             setValue("sexo", initialData.sexo);
@@ -56,10 +58,10 @@ export function EditPatienteDialog({
         updatedPaciente : Omit<Data, "id">
     ): Promise<Data> {
         try {
-            const response = await fetch(`http://localhost:3000/pacientes/${id}`, {
+            const response = await fetch(`http://localhost:8080/pacientes/${patientId}`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'applicantion/json',
+                    'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(updatedPaciente),
             });
