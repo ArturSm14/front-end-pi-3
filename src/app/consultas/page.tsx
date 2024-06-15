@@ -14,7 +14,7 @@ interface Data{
     queixaPrincipal: string;
     medico: string;
     diagnostico: string;
-    paciente: string;
+    paciente: number;
 }
 
 export default function Consultas(){
@@ -22,11 +22,13 @@ export default function Consultas(){
     const [consultas, setConsultas] = useState<Data[]>([]);
     const [loading, setLoading]= useState(true)
     const [selectedConsulta, setSelectedConsulta] = useState<Data | null>(null);
+    
+
 
     useEffect(() => {
         async function fetchData() {
             try {
-                const response = await fetch('http://localhost:3000/consultas')
+                const response = await fetch('http://localhost:8080/consultas')
                 if (!response.ok) {
                     throw new Error('Erro ao buscar dados');
                 }
@@ -56,7 +58,7 @@ export default function Consultas(){
 
     async function handleDeleteConsulta(id: number) {
         try {
-            const response = await fetch(`http://localhost:3000/consultas/${id}`, {
+            const response = await fetch(`http://localhost:8080/consultas/${id}`, {
                 method: 'DELETE',
             });
 
@@ -74,7 +76,7 @@ export default function Consultas(){
 
         <div className="flex flex-col m-10 p-3">
                 <div className="flex flex-col mb-8 gap-4">
-                    <h2 className="text-4xl">Lista de Cosnultas</h2>
+                    <h2 className="text-4xl">Lista de Consultas</h2>
                     <Dialog>
                         <DialogTrigger asChild>
                             <Button className="w-[200px]">Registrar nova consulta</Button>
@@ -113,7 +115,7 @@ export default function Consultas(){
                                             <TableCell><FilePenLine onClick={() => setSelectedConsulta(consulta)} className="cursor-pointer"/></TableCell>
                                         </DialogTrigger>
                                         
-                                       {selectedConsulta && (
+                                       {selectedConsulta && selectedConsulta.id === consulta.id &&(
                                             <EditConsultaDialog 
                                                 consultaId={selectedConsulta.id}
                                                 initialData={selectedConsulta}

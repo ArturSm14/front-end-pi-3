@@ -58,7 +58,7 @@ export function CreatePatienteDialog( { onAddPaciente } : { onAddPaciente: (newP
 
   async function addPaciente(newPaciente: Omit<Data, 'id'>): Promise<Data>{
     try {
-      const response = await fetch('http://localhost:3000/pacientes', {
+      const response = await fetch('http://localhost:8080/pacientes', {
         method: 'POST',
         headers: {
           'Content-Type' : 'application/json',
